@@ -17,9 +17,13 @@ import java.util.logging.Level;
 import static java.math.BigDecimal.*;
 
 /**
- * This class is used when a spreadsheet needs to be generated dynamically
+ * Reader and simple writer for Excel workbooks backed by Apache POI.
+ * Supports legacy {@code .xls} and modern {@code .xlsx} formats via the
+ * appropriate workbook implementation and exposes convenience methods for
+ * row/column access and object mapping.
  *
- * @author Ernst Created:23 Oct 2013
+ * @author Ernst
+ * 		Created:23 Oct 2013
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 @Log
@@ -34,7 +38,15 @@ public class ExcelReader
 	private Sheet currentSheet;
 
 	/**
-	 * Constructs with a file to read
+	 * Creates a reader for the first sheet in the provided input stream.
+	 *
+	 * @param inputStream
+	 * 		the Excel file input stream
+	 * @param extension
+	 * 		the file extension, {@code xls} or {@code xlsx}
+	 *
+	 * @throws ExcelRenderingException
+	 * 		if the stream is null or the workbook cannot be opened
 	 */
 	public ExcelReader(InputStream inputStream, String extension) throws ExcelRenderingException
 	{
@@ -42,7 +54,17 @@ public class ExcelReader
 	}
 
 	/**
-	 * Constructs with a file to create
+	 * Creates a reader for the given sheet index in the provided input stream.
+	 *
+	 * @param inputStream
+	 * 		the Excel file input stream
+	 * @param extension
+	 * 		the file extension, {@code xls} or {@code xlsx}
+	 * @param sheet
+	 * 		the zero-based sheet index to use as the current sheet
+	 *
+	 * @throws ExcelRenderingException
+	 * 		if the stream is null or the workbook cannot be opened
 	 */
 	public ExcelReader(InputStream inputStream, String extension, int sheet) throws ExcelRenderingException
 	{
@@ -81,6 +103,11 @@ public class ExcelReader
 		}
 	}
 
+	/**
+	 * Returns the underlying workbook instance.
+	 *
+	 * @return the Apache POI workbook
+	 */
 	public Workbook getWorkbook()
 	{
 		if (isH)
@@ -94,7 +121,10 @@ public class ExcelReader
 	}
 
 	/**
-	 * Creates the cell headers
+	 * Writes a header row at index {@code 0} in the current sheet.
+	 *
+	 * @param headers
+	 * 		the header values to write
 	 */
 	public void writeHeader(List<String> headers)
 	{
@@ -109,16 +139,16 @@ public class ExcelReader
 	}
 
 	/**
-	 * Fetches a sheets complete data for the given number of records
+	 * Fetches a sheet's data into a rectangular table.
 	 *
 	 * @param sheetNumber
-	 * 		The sheet number starts at 0
+	 * 		the sheet number, starting at 0
 	 * @param start
-	 * 		How many rows to skip
+	 * 		how many rows to skip before collecting
 	 * @param records
-	 * 		The number of rows to return
+	 * 		the number of rows to return
 	 *
-	 * @return
+	 * @return a 2D array of values, with row and column counts derived from the sheet
 	 */
 	public Object[][] fetchRows(int sheetNumber, int start, int records)
 	{
@@ -243,11 +273,12 @@ public class ExcelReader
 	}
 
 	/**
-	 * Returns the number of columns
+	 * Returns the number of columns in a sheet based on the row at the same index.
 	 *
 	 * @param sheetNo
+	 * 		the sheet index
 	 *
-	 * @return
+	 * @return the number of cells in the row at {@code sheetNo}
 	 */
 	public int getColCount(int sheetNo)
 	{
@@ -265,6 +296,14 @@ public class ExcelReader
 		return row.getLastCellNum();
 	}
 
+	/**
+	 * Returns the number of rows in the given sheet.
+	 *
+	 * @param sheetNo
+	 * 		the sheet index
+	 *
+	 * @return the number of rows in the sheet
+	 */
 	public int getRowCount(int sheetNo)
 	{
 		if (isH)
@@ -280,7 +319,12 @@ public class ExcelReader
 	}
 
 	/**
-	 * Writes a row of strings to the given row number (created)
+	 * Writes a row of strings to the given row index in the current sheet.
+	 *
+	 * @param rowNumber
+	 * 		the row index to create
+	 * @param headers
+	 * 		the values to write
 	 */
 	public void writeRow(int rowNumber, List<String> headers)
 	{
@@ -295,7 +339,13 @@ public class ExcelReader
 	}
 
 	/**
-	 * Writes data to a spreadsheet row
+	 * Writes a row of values to the given row index in the current sheet.
+	 * Values are coerced based on their runtime type.
+	 *
+	 * @param rowNumber
+	 * 		the row index to create
+	 * @param rowData
+	 * 		the values to write
 	 */
 	@SuppressWarnings("ConstantConditions")
 	public void writeRow(int rowNumber, Object[] rowData)
@@ -343,17 +393,40 @@ public class ExcelReader
 		}
 	}
 
+	/**
+	 * Returns a row from the current sheet.
+	 *
+	 * @param rowNumber
+	 * 		the row index
+	 *
+	 * @return the row, or {@code null} if not present
+	 */
 	public Row getRow(int rowNumber)
 	{
 		return currentSheet.getRow(rowNumber);
 	}
 
+	/**
+	 * Returns a cell from the current sheet.
+	 *
+	 * @param rowNumber
+	 * 		the row index
+	 * @param cellNumber
+	 * 		the cell index within the row
+	 *
+	 * @return the cell, or {@code null} if not present
+	 */
 	public Cell getCell(int rowNumber, int cellNumber)
 	{
 		return currentSheet.getRow(rowNumber)
 		                   .getCell(cellNumber);
 	}
 
+	/**
+	 * Serializes the workbook into a byte array.
+	 *
+	 * @return the workbook bytes, or {@code null} if an error occurs
+	 */
 	public byte[] get()
 	{
 		byte[] output = null;
@@ -376,6 +449,19 @@ public class ExcelReader
 		return output;
 	}
 
+	/**
+	 * Reads rows from the named sheet and maps them into objects using Jackson.
+	 * The first row is treated as a header row and used as JSON field names.
+	 *
+	 * @param sheetName
+	 * 		the sheet name to read
+	 * @param type
+	 * 		the target type to deserialize into
+	 * @param <T>
+	 * 		the target type
+	 *
+	 * @return a list of mapped objects
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> getRecords(String sheetName, Class<T> type)
 	{
@@ -426,6 +512,12 @@ public class ExcelReader
 		return output;
 	}
 
+	/**
+	 * Closes the underlying workbook and input stream.
+	 *
+	 * @throws Exception
+	 * 		if closing fails
+	 */
 	@Override
 	public void close() throws Exception
 	{
