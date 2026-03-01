@@ -1,5 +1,5 @@
 module com.guicedee.excelrepresentation {
-	exports com.guicedee.services.excelrepresentation;
+	exports com.guicedee.modules.services.excelrepresentation;
 	
 	requires com.guicedee.jsonrepresentation;
 	

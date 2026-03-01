@@ -1,8 +1,8 @@
-package com.guicedee.services.excelrepresentation;
+package com.guicedee.modules.services.excelrepresentation;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.guicedee.services.jsonrepresentation.IJsonRepresentation;
+import com.guicedee.modules.services.jsonrepresentation.IJsonRepresentation;
 import lombok.extern.java.Log;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;

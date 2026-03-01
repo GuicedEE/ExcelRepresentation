@@ -1,0 +1,19 @@
+name: Build Excel Representation
+on:
+  workflow_dispatch:
+    inputs:
+      centralRelease:
+        type: boolean
+        description: Run a release to maven central
+        default: false
+  push:
+jobs:
+  Excel:
+    uses: GuicedEE/Workflows/.github/workflows/projects.yml@master
+    with:
+      baseDir: ''
+      name: 'Excel Representation'
+      sonarProjectName: 'GuicedEE_ExcelRepresentation'
+      sonarOrganization: 'guicedee'
+      publishToCentral: ${{inputs.centralRelease}}
+    secrets: inherit
