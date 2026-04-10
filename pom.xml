@@ -5,13 +5,13 @@
     <parent>
         <groupId>com.guicedee</groupId>
         <artifactId>parent</artifactId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>2.0.0-RC1</version>
     </parent>
     <groupId>com.guicedee.modules.representations</groupId>
     <artifactId>excel-representation</artifactId>
     <name>Excel Representation</name>
     <packaging>jar</packaging>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0-RC1</version>
 
     <properties>
         <project.scm.nameUrl>/GuicedEE/Services</project.scm.nameUrl>
