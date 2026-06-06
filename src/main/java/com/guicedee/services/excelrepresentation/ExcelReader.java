@@ -462,7 +462,6 @@ public class ExcelReader
 	 *
 	 * @return a list of mapped objects
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> List<T> getRecords(String sheetName, Class<T> type)
 	{
 		int sheetLocation = getWorkbook().getSheetIndex(sheetName);
