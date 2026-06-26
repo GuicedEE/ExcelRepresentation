@@ -6,7 +6,7 @@ module com.guicedee.excelrepresentation {
 	requires org.apache.poi.ooxml;
 	requires org.apache.poi.poi;
 	requires org.json;
-	requires com.fasterxml.jackson.databind;
+	requires tools.jackson.databind;
 	
 	requires static lombok;
 	requires java.logging;
